@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+  targetNamespace="http://www.xbrl.org/inlineXBRL/transformation/2010-04-20"
+  xmlns:ixt="http://www.xbrl.org/inlineXBRL/transformation/2010-04-20"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+<!--
+
+iXBRL Function Registry I/O Type Definitions
+
+The following are used to define the valid content models for the input and
+output types for the various iXBRL transformation functions.
+
+-->
+
+  <xs:simpleType name="nonNegativeDecimalType">
+    <xs:annotation>
+      <xs:documentation>
+        As xs:decimal but not negative.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:decimal">
+      <xs:minInclusive value="0" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="numcommaType">
+    <xs:annotation>
+      <xs:documentation>
+        Positive decimal values with a comma for the fraction separator.
+        No spaces (unless leading or trailing), signs, exponentials, or thousands separators accepted.
+        Must have at least one digit before the decimal point, if any.
+        If there is a decimal, then it must be followed by at least one digit.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:whiteSpace value="collapse" />
+      <xs:pattern value="\d+(,\d+)?"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="numcommadotType">
+    <xs:annotation>
+      <xs:documentation>
+        Positive decimal values with a comma for the thousands separator and
+        a dot for the fraction separator.
+        No spaces (unless leading or trailing), signs, or exponentials accepted.
+        Must have at least one digit before the decimal point, if any.
+        If there is a decimal, then it must be followed by at least one digit.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:whiteSpace value="collapse" />
+      <xs:pattern value="\d{1,3}(,\d{3,3})*(\.\d+)?"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="numdashType">
+    <xs:annotation>
+      <xs:documentation>
+        Single dash character used to denote a zero value.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:whiteSpace value="collapse" />
+      <xs:pattern value="-"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="numdotcommaType">
+    <xs:annotation>
+      <xs:documentation>
+        Positive decimal values with a dot for the thousands separator and
+        a comma for the fraction separator.
+        No spaces (unless leading or trailing), signs, or exponentials accepted.
+        Must have at least one digit before the decimal point, if any.
+        If there is a decimal, then it must be followed by at least one digit.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:whiteSpace value="collapse" />
+      <xs:pattern value="\d{1,3}(.\d{3,3})*(,\d+)?"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="numspacedotType">
+    <xs:annotation>
+      <xs:documentation>
+        Positive decimal values with a single space for the thousands separator and
+        a dot for the fraction separator.
+        No spaces (unless leading or trailing), signs, or exponentials accepted.
+        Must have at least one digit before the decimal point, if any.
+        If there is a decimal, then it must be followed by at least one digit.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:whiteSpace value="collapse" />
+      <xs:pattern value="\d{1,3}( \d{3,3})*(\.\d+)?"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="numspacecommaType">
+    <xs:annotation>
+      <xs:documentation>
+        Positive decimal values with a single space for the thousands separator and
+        a comma for the fraction separator.
+        No spaces (unless leading or trailing), signs, or exponentials accepted.
+        Must have at least one digit before the decimal point, if any.
+        If there is a decimal, then it must be followed by at least one digit.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:whiteSpace value="collapse" />
+      <xs:pattern value="\d{1,3}( \d{3,3})*(,\d+)?"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="dateslashusType">
+    <xs:annotation>
+      <xs:documentation>
+        Date in format MM/DD/YY(YY).  Will also accept single digits for D, M, Y.
+        Does not check for valid day or month.  e.g. accepts 02/30/2008 40/40/2008
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:whiteSpace value="collapse" />
+      <xs:pattern value="\d{1,2}/\d{1,2}/(\d|\d{2,2}|\d{4,4})"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="dateslasheuType">
+    <xs:annotation>
+      <xs:documentation>
+        Date in format DD/MM/YY(YY).  Will also accept single digits for D, M, Y.
+        Does not check for valid day or month.  e.g. accepts 30/02/2008 40/40/2008
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="ixt:dateslashusType"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="datedotusType">
+    <xs:annotation>
+      <xs:documentation>
+        Date in format MM.DD.YY(YY).  Will also accept single digits for D, M, Y.
+        Does not check for valid day or month.  e.g. accepts 02.30.2008 40.40.2008
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:whiteSpace value="collapse" />
+      <xs:pattern value="\d{1,2}\.\d{1,2}\.(\d|\d{2,2}|\d{4,4})"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="datedoteuType">
+    <xs:annotation>
+      <xs:documentation>
+        Date in format DD.MM.YY(YY).  Will also accept single digits for D, M, Y.
+        Does not check for valid day or month.  e.g. accepts 30.02.2008 40.40.2008
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="ixt:datedotusType"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="datelongusType">
+    <xs:annotation>
+      <xs:documentation>
+        Date in format Month DD, YY(YY).  Will also accept single digits for D.
+        Does not check for valid day or month.  e.g. accepts "February 30, 2008" and
+        "March 40, 2008".
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:whiteSpace value="collapse" />
+      <xs:pattern value="(January|February|March|April|May|June|July|August|September|October|November|December) (\d|\d{2,2}), (\d{2,2}|\d{4,4})"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="datelongukType">
+    <xs:annotation>
+      <xs:documentation>
+        Date in format DD Month YY(YY).  Will also accept single digits for D.
+        Does not check for valid day or month.  e.g. accepts "30 February 2008" and
+        "40 March 2008"
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:whiteSpace value="collapse" />
+      <xs:pattern value="(\d|\d{2,2}) (January|February|March|April|May|June|July|August|September|October|November|December) (\d{2,2}|\d{4,4})"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="dateshortusType">
+    <xs:annotation>
+      <xs:documentation>
+        Date in format Mon DD, YY(YY).  Will also accept single digits for D.
+        Does not check for valid day or month.  e.g. accepts "Feb 30, 2008" and
+        "Mar 40, 2008".
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:whiteSpace value="collapse" />
+      <xs:pattern value="(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d|\d{2,2}), (\d{2,2}|\d{4,4})"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="dateshortukType">
+    <xs:annotation>
+      <xs:documentation>
+        Date in format DD Mon YY(YY).  Will also accept single digits for D.
+        Does not check for valid day or month.  e.g. accepts "30 Feb 2008" and
+        "40 Mar 2008"
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:whiteSpace value="collapse" />
+      <xs:pattern value="(\d|\d{2,2}) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{2,2}|\d{4,4})"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="datelongmonthdayusType">
+    <xs:annotation>
+      <xs:documentation>
+        Date in format Mon DD.  Will also accept single digits for D.
+        Does not check for valid day/month combination.  e.g. accepts "February 30" and
+        "March 40".
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:whiteSpace value="collapse" />
+      <xs:pattern value="(January|February|March|April|May|June|July|August|September|October|November|December) (\d|\d{2,2})"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="datelongdaymonthukType">
+    <xs:annotation>
+      <xs:documentation>
+        Date in format DD Mon.  Will also accept single digits for D.
+        Does not check for valid day/month combination.  e.g. accepts "30 February" and
+        "40 March"
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:whiteSpace value="collapse" />
+      <xs:pattern value="(\d|\d{2,2}) (January|February|March|April|May|June|July|August|September|October|November|December)"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="dateshortmonthdayusType">
+    <xs:annotation>
+      <xs:documentation>
+        Date in format Mon DD.  Will also accept single digits for D.
+        Does not check for valid day/month combination.  e.g. accepts "Feb 30" and
+        "Mar 40".
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:whiteSpace value="collapse" />
+      <xs:pattern value="(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d|\d{2,2})"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="dateshortdaymonthukType">
+    <xs:annotation>
+      <xs:documentation>
+        Date in format DD Mon.  Will also accept single digits for D.
+        Does not check for valid day/month combination.  e.g. accepts "30 Feb" and
+        "40 Mar"
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:whiteSpace value="collapse" />
+      <xs:pattern value="(\d|\d{2,2}) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="dateslashmonthdayusType">
+    <xs:annotation>
+      <xs:documentation>
+        Date in format MM/DD.  Will also accept single digits for D and M.
+        Does not check for valid day/month combination.  e.g. accepts "02/30" and
+        "03/40".
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:whiteSpace value="collapse" />
+      <xs:pattern value="(\d|\d{2,2})/(\d|\d{2,2})"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="dateslashdaymontheuType">
+    <xs:annotation>
+      <xs:documentation>
+        Date in format DD/MM.  Will also accept single digits for D and M.
+        Does not check for valid day/month combination.  e.g. accepts "30/02" and
+        "40/03"
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:whiteSpace value="collapse" />
+      <xs:pattern value="(\d|\d{2,2})/(\d|\d{2,2})"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="datelongyearmonthType">
+    <xs:annotation>
+      <xs:documentation>
+        Date in format YY(YY) Month.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:whiteSpace value="collapse" />
+      <xs:pattern value="(\d{2,2}|\d{4,4}) (January|February|March|April|May|June|July|August|September|October|November|December)"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="dateshortyearmonthType">
+    <xs:annotation>
+      <xs:documentation>
+        Date in format YY(YY) Mon.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:whiteSpace value="collapse" />
+      <xs:pattern value="(\d{2,2}|\d{4,4}) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="datelongmonthyearType">
+    <xs:annotation>
+      <xs:documentation>
+        Date in format Month YY(YY).
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:whiteSpace value="collapse" />
+      <xs:pattern value="(January|February|March|April|May|June|July|August|September|October|November|December) (\d{2,2}|\d{4,4})"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="dateshortmonthyearType">
+    <xs:annotation>
+      <xs:documentation>
+        Date in format Mon YY(YY).
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:whiteSpace value="collapse" />
+      <xs:pattern value="(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{2,2}|\d{4,4})"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>
+
+<!--
+
+XBRL and XSLT QName placeholders
+
+The following are empty content elements in order to "hold" the QNames for the
+iXBRL Function Registry signatures, and corresponding XSLT 2.0 Function
+definitions.
+
+ -->
+
+  <xs:element name="numcomma">
+    <xs:complexType/>
+  </xs:element>
+
+  <xs:element name="numcommadot">
+    <xs:complexType/>
+  </xs:element>
+
+  <xs:element name="numdash">
+    <xs:complexType/>
+  </xs:element>
+
+  <xs:element name="numdotcomma">
+    <xs:complexType/>
+  </xs:element>
+
+  <xs:element name="numspacedot">
+    <xs:complexType/>
+  </xs:element>
+
+  <xs:element name="numspacecomma">
+    <xs:complexType/>
+  </xs:element>
+
+  <xs:element name="dateslashus">
+    <xs:complexType/>
+  </xs:element>
+
+  <xs:element name="dateslasheu">
+    <xs:complexType/>
+  </xs:element>
+
+  <xs:element name="datedotus">
+    <xs:complexType/>
+  </xs:element>
+
+  <xs:element name="datedoteu">
+    <xs:complexType/>
+  </xs:element>
+
+  <xs:element name="datelongus">
+    <xs:complexType/>
+  </xs:element>
+
+  <xs:element name="datelonguk">
+    <xs:complexType/>
+  </xs:element>
+
+  <xs:element name="dateshortus">
+    <xs:complexType/>
+  </xs:element>
+
+  <xs:element name="dateshortuk">
+    <xs:complexType/>
+  </xs:element>
+
+  <xs:element name="datelongdaymonthuk">
+    <xs:complexType/>
+  </xs:element>
+
+  <xs:element name="datelongmonthdayus">
+    <xs:complexType/>
+  </xs:element>
+
+  <xs:element name="dateshortdaymonthuk">
+    <xs:complexType/>
+  </xs:element>
+
+  <xs:element name="dateshortmonthdayus">
+    <xs:complexType/>
+  </xs:element>
+
+  <xs:element name="dateslashdaymontheu">
+    <xs:complexType/>
+  </xs:element>
+
+  <xs:element name="dateslashmonthdayus">
+    <xs:complexType/>
+  </xs:element>
+
+  <xs:element name="datelongyearmonth">
+    <xs:complexType/>
+  </xs:element>
+
+  <xs:element name="dateshortyearmonth">
+    <xs:complexType/>
+  </xs:element>
+
+  <xs:element name="datelongmonthyear">
+    <xs:complexType/>
+  </xs:element>
+
+  <xs:element name="dateshortmonthyear">
+    <xs:complexType/>
+  </xs:element>
+
+</xs:schema>

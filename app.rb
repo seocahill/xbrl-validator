@@ -5,6 +5,10 @@ require 'pry'
 
 configure { set :server, :puma }
 
+get '/' do
+  "Hello World"
+end
+
 post '/validate' do
   content_type :json
   validation_results = XbrlInstanceValidator.new(params).validate_document

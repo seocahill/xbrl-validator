@@ -5,10 +5,6 @@ require 'pry'
 
 configure { set :server, :puma }
 
-get '/' do
-  "Hello World"
-end
-
 post '/validate' do
   content_type :json
   validation_results = XbrlInstanceValidator.new(params).validate_document
@@ -26,12 +22,7 @@ class XbrlInstanceValidator
     stages = [
       :xml_well_formed,
       :ixbrl_xhtml_schema_valid,
-      :taxonomy_schema_ref_valid,
-      :ixbrl_spec_rules,
-      :dts_discovery,
       :xbrl_instance_schema_valid,
-      :xbrl_spec_rules,
-      :custom_rules
     ]
     current_stage = ""
     stages.each do |stage|
@@ -72,18 +63,6 @@ class XbrlInstanceValidator
     errors
   end
 
-  def taxonomy_schema_ref_valid(params, errors)
-    errors
-  end
-
-  def ixbrl_spec_rules(params, errors)
-    errors
-  end
-
-  def dts_discovery(params, errors)
-    errors
-  end
-
   def xbrl_instance_schema_valid(params, errors)
     xbrl_instance = params["xbrl_instance"]
     begin
@@ -98,14 +77,6 @@ class XbrlInstanceValidator
     rescue Nokogiri::XML::SyntaxError => e
       errors << "caught exception: #{e}"
     end
-    errors
-  end
-
-  def xbrl_spec_rules(params, errors)
-    errors
-  end
-
-  def custom_rules(params, errors)
     errors
   end
 end

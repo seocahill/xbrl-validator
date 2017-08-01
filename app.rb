@@ -1,14 +1,12 @@
 require 'sinatra'
 require 'nokogiri'
 require 'json'
-# require 'pry'
 
 set :server, :puma
 set :bind, '0.0.0.0'
 
 post '/validate' do
   content_type :json
-  puts "hello"
   validation_results = XbrlInstanceValidator.new(params).validate_document
   [200, validation_results]
 end
@@ -24,7 +22,7 @@ class XbrlInstanceValidator
     stages = [
       :xml_well_formed,
       :ixbrl_xhtml_schema_valid,
-      :xbrl_instance_schema_valid,
+      :xbrl_instance_schema_valid
     ]
     current_stage = ""
     stages.each do |stage|
@@ -55,7 +53,6 @@ class XbrlInstanceValidator
       xsd = Nokogiri::XML::Schema(File.open(file))
       lines = ixbrl_instance.each_line
       xsd.validate(parsed_doc).each do |error|
-        puts error.line
         extract = lines.take(error.line).last(5) rescue "no extract"
         errors << {line: error.line, message: error.message, extract: extract}
       end
@@ -66,7 +63,7 @@ class XbrlInstanceValidator
   end
 
   def xbrl_instance_schema_valid(params, errors)
-    xbrl_instance = params["xml"]
+    xbrl_instance = params["xbrl_xml"]
     begin
       parsed_doc = Nokogiri::XML(xbrl_instance) { |config| config.strict }
       xsd_entry_file = "xsd/ie/ie-gaap-main-2012-12-01.xsd"

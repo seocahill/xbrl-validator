@@ -1,12 +1,14 @@
 require 'sinatra'
 require 'nokogiri'
 require 'json'
-require 'pry'
+# require 'pry'
 
-configure { set :server, :puma }
+set :server, :puma
+set :bind, '0.0.0.0'
 
 post '/validate' do
   content_type :json
+  puts "hello"
   validation_results = XbrlInstanceValidator.new(params).validate_document
   [200, validation_results]
 end
@@ -36,7 +38,7 @@ class XbrlInstanceValidator
   private
 
   def xml_well_formed(params, errors)
-    ixbrl_instance = params["ixbrl_instance"]
+    ixbrl_instance = params["ixbrl_html"]
     begin
       Nokogiri::XML(ixbrl_instance) { |config| config.strict }
     rescue Nokogiri::XML::SyntaxError => e
@@ -46,7 +48,7 @@ class XbrlInstanceValidator
   end
 
   def ixbrl_xhtml_schema_valid(params, errors)
-    ixbrl_instance = params["ixbrl_instance"]
+    ixbrl_instance = params["ixbrl_html"]
     begin
       parsed_doc = Nokogiri::XML(ixbrl_instance)
       file = "xsd/xhtml-inlinexbrl-1_0.xsd"
@@ -64,7 +66,7 @@ class XbrlInstanceValidator
   end
 
   def xbrl_instance_schema_valid(params, errors)
-    xbrl_instance = params["xbrl_instance"]
+    xbrl_instance = params["xml"]
     begin
       parsed_doc = Nokogiri::XML(xbrl_instance) { |config| config.strict }
       xsd_entry_file = "xsd/ie/ie-gaap-main-2012-12-01.xsd"

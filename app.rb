@@ -45,11 +45,11 @@ class XbrlValidator
   end
 
   def company_name_present
-    company_name = doc.xpath("//ix:nonNumeric[@name='uk-bus:EntityCurrentLegalOrRegisteredName']")&.first&.text
-    if company_name&.empty?
-      "invalid: uk-bus:EntityCurrentLegalOrRegisteredName must be present"
-    else
+    company_name = @doc.xpath("//ix:nonNumeric[@name='uk-bus:EntityCurrentLegalOrRegisteredName']")&.first&.text
+    if !company_name.to_s.strip.empty?
       "valid"
+    else
+      "invalid: uk-bus:EntityCurrentLegalOrRegisteredName must be present"
     end
   end
 end

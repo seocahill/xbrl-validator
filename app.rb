@@ -46,13 +46,13 @@ class BusinessRulesValidator
   end
 
   def validate_document
-    @messages[:schema_ref_test] = schema_ref_test
+    @messages[:schema_ref] = schema_ref
     @messages[:mandatory_tags_present] = mandatory_tags_present
     @messages[:period_dates] = period_dates
     @messages[:duplicate_facts] = duplicate_facts
     @messages[:context_scheme_consistent] = context_scheme_consistent
     @messages[:context_scheme_allowed] = context_scheme_allowed
-    @messages[:context_identifer] = context_identifer
+    @messages[:context_identifiers] = context_identifiers
     @messages[:cro_number_required] = cro_number_required
     @messages
   end
@@ -82,7 +82,7 @@ class BusinessRulesValidator
     # - Report period end date cannot be before the selected Revenue accounting period end date (<value>).
     # - Report period end date must fall within the selected Revenue accounting period.
     end_date = @doc.xpath("//*[@name='uk-bus:EndDateForPeriodCoveredByReport']")&.first&.text&.strip
-    if end_date && Time.parse(end_date) > Time.parse(" 2011-12-31")
+    if end_date && (Time.parse(end_date) > Time.parse(" 2011-12-31"))
       "valid"
     else
       "invalid: Period End Date is #{end_date} but must be 2011-12-31 or later"
@@ -108,12 +108,12 @@ class BusinessRulesValidator
             line_number: fact.line,
             conflicting_fact: entry
           }
+        end
       end
     end
 
-    if duplicate_facts.any? 
-      { message: "invalid", duplicate_facts: duplicate_facts }
-    else
+    message = duplicate_facts.any? ? "invalid" : "valid"
+    { message: message, duplicate_facts: duplicate_facts }
   end
 
   def context_scheme_consistent
@@ -126,11 +126,11 @@ class BusinessRulesValidator
   end
 
   def context_scheme_allowed
-    context_scheme = @doc.xpath("//*[@scheme]").first
-    if VALID_CONTEXT_ENTITY_IDENTIFIERS.exlude? context_scheme
-      "invalid: #{context_identifiers.first} is not a valid schema"
-    else
+    context_scheme = @doc.xpath("//*[@scheme]").first.attributes["scheme"].value
+    if VALID_CONTEXT_ENTITY_IDENTIFIERS.include? context_scheme
       "valid"
+    else
+      "invalid: #{context_scheme} is not a valid schema"
     end
   end
 

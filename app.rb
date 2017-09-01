@@ -12,7 +12,7 @@ end
 get '/validate/:filename' do
   content_type :json
   begin
-    response = XbrlValidator.new(params).validate_document
+    response = BusinessRulesValidator.new(params).validate_document
     [200, response.to_json]
   rescue => e
     error = { message: e.message }
@@ -20,7 +20,7 @@ get '/validate/:filename' do
   end
 end
 
-class XbrlValidator
+class BusinessRulesValidator
 
   def initialize(params)
     @messages = {}

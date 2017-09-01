@@ -5,78 +5,52 @@ require 'json'
 set :server, :puma
 set :bind, '0.0.0.0'
 
-post '/validate' do
-  content_type :json
-  validation_results = XbrlInstanceValidator.new(params).validate_document
-  [200, validation_results]
+get '/' do
+  200
 end
 
-class XbrlInstanceValidator
+get '/validate/:filename' do
+  content_type :json
+  begin
+    response = XbrlValidator.new(params).validate_document
+    [200, response.to_json]
+  rescue => e
+    error = { message: e.message }
+    [500, error.to_json]
+  end
+end
+
+class XbrlValidator
 
   def initialize(params)
-    @params = params
-    @errors = []
+    @messages = {}
+    file = File.open(File.join('/ixbrl', params["filename"]))
+    @doc = Nokogiri::XML(file)
   end
 
   def validate_document
-    stages = [
-      :xml_well_formed,
-      :ixbrl_xhtml_schema_valid,
-      :xbrl_instance_schema_valid
-    ]
-    current_stage = ""
-    stages.each do |stage|
-      current_stage = stage
-      send(stage, @params, @errors)
-      break if @errors.any?
-    end
-    {validation_stage: current_stage.to_s, errors: @errors}.to_json
+    @messages[:schema_ref_test] = schema_ref_test
+    @messages[:company_name_present] = company_name_present
+    @messages
   end
 
-  private
-
-  def xml_well_formed(params, errors)
-    ixbrl_instance = params["ixbrl_html"]
-    begin
-      Nokogiri::XML(ixbrl_instance) { |config| config.strict }
-    rescue Nokogiri::XML::SyntaxError => e
-      errors << "caught exception: #{e}"
+  def schema_ref_test
+    schemas = ["http://www.xbrl-ie.net/public/ci/2012-12-01/gaap/core/2012-12-01/ie-gaap-full-2012-12-01.xsd"]
+    schemaRef = @doc.xpath('//link:schemaRef').first.attributes["href"].value
+    if schemas.include? schemaRef
+     "valid"
+    else
+     "invalid: #{schemaRef} is not a valid schema"
     end
-    errors
   end
 
-  def ixbrl_xhtml_schema_valid(params, errors)
-    ixbrl_instance = params["ixbrl_html"]
-    begin
-      parsed_doc = Nokogiri::XML(ixbrl_instance)
-      file = "xsd/xhtml-inlinexbrl-1_0.xsd"
-      xsd = Nokogiri::XML::Schema(File.open(file))
-      lines = ixbrl_instance.each_line
-      xsd.validate(parsed_doc).each do |error|
-        extract = lines.take(error.line).last(5) rescue "no extract"
-        errors << {line: error.line, message: error.message, extract: extract}
-      end
-    rescue Nokogiri::XML::SyntaxError => e
-      errors << "caught exception: #{e}"
+  def company_name_present
+    company_name = doc.xpath("//ix:nonNumeric[@name='uk-bus:EntityCurrentLegalOrRegisteredName']")&.first&.text
+    if company_name&.empty?
+      "invalid: uk-bus:EntityCurrentLegalOrRegisteredName must be present"
+    else
+      "valid"
     end
-    errors
-  end
-
-  def xbrl_instance_schema_valid(params, errors)
-    xbrl_instance = params["xbrl_xml"]
-    begin
-      parsed_doc = Nokogiri::XML(xbrl_instance) { |config| config.strict }
-      xsd_entry_file = "xsd/ie/ie-gaap-main-2012-12-01.xsd"
-      xsd = Nokogiri::XML::Schema(File.open(xsd_entry_file))
-      lines = xbrl_instance.each_line
-      xsd.validate(parsed_doc).each do |error|
-        extract = lines.take(error.line).last(5) rescue "no extract"
-        errors << {line: error.line, message: error.message, extract: extract}
-      end
-    rescue Nokogiri::XML::SyntaxError => e
-      errors << "caught exception: #{e}"
-    end
-    errors
   end
 end
 

@@ -24,7 +24,11 @@ end
 class BusinessRulesValidator
 
   VALID_SCHEMAS = [
-    "http://www.xbrl-ie.net/public/ci/2012-12-01/gaap/core/2012-12-01/ie-gaap-full-2012-12-01.xsd"
+    "http://www.xbrl-ie.net/public/ci/2012-12-01/gaap/core/2012-12-01/ie-gaap-full-2012-12-01.xsd",
+    "http://www.xbrl-ie.net/public/ci/2012-12-01/ifrs/core/2012-12-01/ie-ifrs-full-2012-12-01.xsd",
+    "http://www.xbrl-ie.net/public/ci/2016-08-01/FRS-101/2016-08-01/FRS-101-ie-2016-08-01.xsd",
+    "http://www.xbrl-ie.net/public/ci/2016-08-01/FRS-102/2016-08-01/FRS-102-ie-2016-08-01.xsd",
+    "http://www.xbrl-ie.net/public/ci/2016-08-01/IFRS/2016-08-01/IFRS-ie-2016-08-01.xsd"
   ]
 
   MANDATORY_TAGS = [

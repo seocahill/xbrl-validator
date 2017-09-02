@@ -47,6 +47,7 @@ class BusinessRulesValidator
     @messages = {}
     file = File.open(File.join('/ixbrl', params["filename"]))
     @doc = Nokogiri::XML(file)
+    @log = Logger.new(File.new(File.join(__dir__, "dev.log"), 'w'))
   end
 
   def validate_document
@@ -101,15 +102,19 @@ class BusinessRulesValidator
 
     facts.each do |fact|
       value = fact_value(fact) # need to transform currency values before comparing
-      bucket = dictionary[fact.attributes["name"].value] ||= {}
-      entry = bucket[fact.attributes["contextRef"].value]
+      name = fact.attributes["name"].value
+      context = fact.attributes["contextRef"].value
+      dictionary[name] ||= {}
 
-      if entry.nil?
-        entry = { value: value, line_number: fact.line }
-      elsif entry[:value] != value
-        duplicate_facts << add_duplicate_fact(fact, value, entry)
+      if dictionary[name][context].nil?
+        dictionary[name][context] = { value: value, line_number: fact.line }
+      elsif dictionary[name][context][:value] != value
+        duplicate_fact = add_duplicate_fact(fact, value, dictionary[name][context])
+        duplicate_facts << duplicate_fact
       end
     end
+
+    @log.debug("dictionary is #{dictionary.inspect}")
 
     message = duplicate_facts.any? ? "invalid" : "valid"
     { message: message, duplicate_facts: duplicate_facts }

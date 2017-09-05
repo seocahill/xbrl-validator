@@ -47,6 +47,7 @@ class BusinessRulesValidator
     @messages = {}
     file = File.open(File.join('/ixbrl', params["filename"]))
     @doc = Nokogiri::XML(file)
+    @log = Logger.new(File.new(File.join(__dir__, "dev.log"), 'w'))
   end
 
   def validate_document
@@ -79,12 +80,12 @@ class BusinessRulesValidator
     end
   end
 
+  # The following checks require data on ROS services and therefore are n/a:
+  # - Report period start date cannot be later than the selected Revenue accounting period start date (<value>).
+  # - Report period end date cannot be before the selected Revenue accounting period end date (<value>).
+  # - Report period end date must fall within the selected Revenue accounting period.
+
   def period_dates
-    # The following checks relate to third-party settings and are therefore n/a:
-    #
-    # - Report period start date cannot be later than the selected Revenue accounting period start date (<value>).
-    # - Report period end date cannot be before the selected Revenue accounting period end date (<value>).
-    # - Report period end date must fall within the selected Revenue accounting period.
     end_date = @doc.xpath("//*[@name='uk-bus:EndDateForPeriodCoveredByReport']")&.first&.text&.strip
     if end_date && (Time.parse(end_date) > Time.parse(" 2011-12-31"))
       "valid"
@@ -94,27 +95,26 @@ class BusinessRulesValidator
   end
 
   def duplicate_facts
-    dictionary = {}
-    duplicate_facts = []
     # exclude facts where tupleRef attr is present as they can have duplicate values
     facts = @doc.xpath("//ix:nonFraction[not(@tupleRef)] | //ix:nonNumeric[not(@tupleRef)]")
+    dictionary = {}
+    duplicate_facts = []
+
     facts.each do |fact|
-      bucket = dictionary[fact.attributes["name"].value] ||= {}
-      entry = bucket[fact.attributes["contextRef"].value]
-      if entry.nil?
-        entry = { value: fact.text, line_number: fact.line }
-      else
-        if entry[:value] != fact.text
-          duplicate_facts << { 
-            name: fact.attributes["name"].value, 
-            context: fact.attributes["contextRef"].value,
-            value: fact.text,
-            line_number: fact.line,
-            conflicting_fact: entry
-          }
-        end
+      value = fact_value(fact) # need to transform currency values before comparing
+      name = fact.attributes["name"].value
+      context = fact.attributes["contextRef"].value
+      dictionary[name] ||= {}
+
+      if dictionary[name][context].nil?
+        dictionary[name][context] = { value: value, line_number: fact.line }
+      elsif dictionary[name][context][:value] != value
+        duplicate_fact = add_duplicate_fact(fact, value, dictionary[name][context])
+        duplicate_facts << duplicate_fact
       end
     end
+
+    @log.debug("dictionary is #{dictionary.inspect}")
 
     message = duplicate_facts.any? ? "invalid" : "valid"
     { message: message, duplicate_facts: duplicate_facts }
@@ -134,7 +134,7 @@ class BusinessRulesValidator
     if VALID_CONTEXT_ENTITY_IDENTIFIERS.include? context_scheme
       "valid"
     else
-      "invalid: #{context_scheme} is not a valid schema"
+      "invalid: #{context_scheme} is not a valid scheme"
     end
   end
 
@@ -166,11 +166,30 @@ class BusinessRulesValidator
 
   private
 
+  def add_duplicate_fact(fact, value, entry)
+    { 
+      name: fact.attributes["name"].value, 
+      context: fact.attributes["contextRef"].value,
+      value: value,
+      line_number: fact.line,
+      conflicting_fact: entry
+    }
+  end
+
   def check_for_missing_tags
     MANDATORY_TAGS.map do |tag|
       tag_content = @doc.xpath("//*[@name='#{tag}']")&.first&.text
       tag if tag_content.to_s.strip.empty?
     end.compact
+  end
+
+  def fact_value(fact)
+    if fact.name == "nonFraction"
+      currency_value = fact.text.gsub(/\D/, '').to_i
+      fact.attributes["sign"]&.value == '-1' ? (currency_value * -1) : currency_value
+    else
+      fact.text
+    end
   end
 end
 

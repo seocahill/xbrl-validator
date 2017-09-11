@@ -1,3 +1,5 @@
+require 'date'
+
 class Converter
 
   def initialize(ixbrl_doc)
@@ -7,28 +9,55 @@ class Converter
   end
 
   def to_xbrl
-    ixbrl_nodes = @doc.xpath("//*[namespace-uri()='http://www.xbrl.org/2008/inlineXBRL']")
-    xbrl_nodes = @doc.xpath("//*[namespace-uri()='http://www.xbrl.org/2003/instance']")
+    exclude_attributes = ["name", "scale", "format", "order", "tupleRef", "tupleID", "sign"]
+    facts = @ixbrl_doc.search("ix|nonNumeric", "ix|nonFraction")
+    tuples = @ixbrl_doc.search("ix|tuple")
+    contexts = @ixbrl_doc.search("xbrli|context")
 
-    insert_node = @xbrl_doc.search('xbrli|unit').last
+    context_insert_node = @xbrl_doc.search('xbrli|unit').last
 
-    xbrl_nodes.each do |xbrli_node|
-      insert_node.add_next_sibling(xbrli_node)
+    contexts.each do |context|
+      copy_context = context.clone
+      context_insert_node.add_next_sibling(copy_context)
     end
 
-    start_node = @xbrl_doc.search('xbrli|context').last
+    fact_insert_node = @xbrl_doc.search('xbrli|context').last
 
-    ixbrl_nodes.each do |ix_node|
-      next if ix_node.name == "exclude"
-      if ix_node.attributes.has_key?("name")
-        fact = @xbrl_doc.create_element(ix_node.attributes["name"], ix_node.content)
-        ix_node.attributes
-          .delete_if {|k, v| ["name", "format", "scale"].include?(k) }
-          .each { |k,v| fact[k] = v }
-        insert_node.add_next_sibling(fact)
+    facts.each do |fact|
+      next if fact.name == "exclude"
+      if fact.attributes.has_key?("name")
+        content = formatted_content(fact)
+        node = @xbrl_doc.create_element(fact.attributes["name"], content)
+        fact.attributes
+          .reject {|k, v| exclude_attributes.include?(k) }
+          .each { |k,v| node[k] = v }
+        fact_insert_node.add_next_sibling(node)
       end
     end
 
-    @xbrl_doc
+    File.open('xbrl.xml', 'w') { |file| file.write(@xbrl_doc.to_xml) }
+  end
+
+  def formatted_content(fact)
+    content = fact.content # doesnt seem to be stripped 
+    format = fact.attributes["format"].value rescue nil
+
+    # remove ix:excludes
+    if fact.children.any?
+      fact.children.select { |f| f.name == "exclude" }.map(&:content).each do |substr|
+        content = content.gsub(substr, '')
+      end
+    end 
+
+    content.strip
+
+    # format strings
+    if format == "ixt:numcommadot"
+      content.gsub(/\(/, "-").gsub(/\,|\)/, "").to_i
+    elsif format == "ixt:datelonguk"
+      DateTime.parse(content).strftime('%Y-%m-%d')
+    else
+      content
+    end
   end
 end

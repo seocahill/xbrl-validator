@@ -1,3 +1,4 @@
+require 'logger'
 require 'sinatra'
 require 'nokogiri'
 require 'json'
@@ -7,6 +8,7 @@ require_relative 'lib/converter'
 set :server, :puma
 set :bind, '0.0.0.0'
 
+# Need this for health check
 get '/' do
   200
 end
@@ -66,13 +68,13 @@ class BusinessRulesValidator
 
   def validate_schema
     errors = []
-    validate_ixbrl(errors)
-    validate_xbrl(errors)
+    validate_ixbrl_schemas(errors)
+    validate_xbrl_schemas(errors)
     message = errors.any? ? "invalid" : "valid"
     {message: message, errors: errors}
   end
 
-  def validate_ixbrl(errors)
+  def validate_ixbrl_schemas(errors)
     begin
       file = "./xsd/xhtml-inlinexbrl-1_0.xsd"
       xsd = Nokogiri::XML::Schema(File.open(file))
@@ -81,12 +83,14 @@ class BusinessRulesValidator
       end
     rescue Nokogiri::XML::SyntaxError => e
       errors << "caught exception: #{e}"
+      @log.error("caught exception: #{e}")
     end
   end
 
-  def validate_xbrl(errors)
-    xbrl_doc = Converter.new(@doc).to_xbrl
+  def validate_xbrl_schemas(errors)
     begin
+      Converter.new(@doc).to_xbrl
+      xbrl_doc = Nokogiri::XML(File.open('xbrl.xml'))
       file = "./xsd/ie/ie-gaap-full-2012-12-01.xsd"
       xsd = Nokogiri::XML::Schema(File.open(file))
       xsd.validate(xbrl_doc).each do |error|
@@ -94,6 +98,7 @@ class BusinessRulesValidator
       end
     rescue Nokogiri::XML::SyntaxError => e
       errors << "caught exception: #{e}"
+      @log.error("caught exception: #{e}")
     end
   end
 
@@ -221,7 +226,7 @@ class BusinessRulesValidator
   def fact_value(fact)
     if fact.name == "nonFraction"
       currency_value = fact.text.gsub(/\D/, '').to_i
-      fact.attributes["sign"]&.value == '-1' ? (currency_value * -1) : currency_value
+      fact.attributes["sign"]&.value == '-' ? (currency_value * -1) : currency_value
     else
       fact.text
     end

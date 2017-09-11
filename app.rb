@@ -2,6 +2,7 @@ require 'sinatra'
 require 'nokogiri'
 require 'json'
 require 'time'
+require_relative 'lib/converter'
 
 set :server, :puma
 set :bind, '0.0.0.0'
@@ -51,6 +52,7 @@ class BusinessRulesValidator
   end
 
   def validate_document
+    @messages[:validate_schema] = validate_schema
     @messages[:schema_ref] = schema_ref
     @messages[:mandatory_tags_present] = mandatory_tags_present
     @messages[:period_dates] = period_dates
@@ -60,6 +62,39 @@ class BusinessRulesValidator
     @messages[:context_identifiers] = context_identifiers
     @messages[:cro_number_required] = cro_number_required
     @messages
+  end
+
+  def validate_schema
+    errors = []
+    validate_ixbrl(errors)
+    validate_xbrl(errors)
+    message = errors.any? ? "invalid" : "valid"
+    {message: message, errors: errors}
+  end
+
+  def validate_ixbrl(errors)
+    begin
+      file = "./xsd/xhtml-inlinexbrl-1_0.xsd"
+      xsd = Nokogiri::XML::Schema(File.open(file))
+      xsd.validate(@doc).each do |error|
+        errors << error
+      end
+    rescue Nokogiri::XML::SyntaxError => e
+      errors << "caught exception: #{e}"
+    end
+  end
+
+  def validate_xbrl(errors)
+    xbrl_doc = Converter.new(@doc).to_xbrl
+    begin
+      file = "./xsd/ie/ie-gaap-full-2012-12-01.xsd"
+      xsd = Nokogiri::XML::Schema(File.open(file))
+      xsd.validate(xbrl_doc).each do |error|
+        errors << error
+      end
+    rescue Nokogiri::XML::SyntaxError => e
+      errors << "caught exception: #{e}"
+    end
   end
 
   def schema_ref

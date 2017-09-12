@@ -84,7 +84,7 @@ class Converter
 
   def formatted_content(fact)
     content = fact.content # doesnt seem to be stripped 
-    format = fact.attributes["format"].value rescue nil
+    format = fact.attributes["format"]&.value
 
     # remove content of ix:excludes nodes
     if fact.children.any?
@@ -97,7 +97,9 @@ class Converter
 
     # format strings
     if format == "ixt:numcommadot"
-      content.gsub(/\(/, "-").gsub(/\,|\)/, "").to_i
+      num = content.gsub(/\(/, "-").gsub(/\,|\)/, "").to_i
+      # if sign attr present number should be negated
+      fact.attributes["sign"]&.value == '-1' ? (num * -1) : num
     elsif format == "ixt:datelonguk"
       DateTime.parse(content).strftime('%Y-%m-%d')
     else

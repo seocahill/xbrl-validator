@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ie-common="http://www.xbrl-ie.net/common/core/2012-12-01" xmlns:iso4217='http://www.xbrl.org/2003/iso4217'
+  xmlns:ix='http://www.xbrl.org/2008/inlineXBRL' xmlns:link='http://www.xbrl.org/2003/linkbase' xmlns:xbrli='http://www.xbrl.org/2003/instance'
+  xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:ixt='http://www.xbrl.org/inlineXBRL/transformation/2010-04-20' xmlns:uk-gaap="http://www.xbrl.org/uk/gaap/core/2009-09-01"
+  xmlns:uk-bus="http://www.xbrl.org/uk/cd/business/2009-09-01" xmlns:uk-direp="http://www.xbrl.org/uk/reports/direp/2009-09-01"
+  xmlns:uk-aurep="http://www.xbrl.org/uk/reports/aurep/2009-09-01" xmlns:uk-countries="http://www.xbrl.org/uk/cd/countries/2009-09-01"
+  xmlns:ie-gaap="http://www.xbrl-ie.net/gaap/core/2012-12-01" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <head>
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type' />
+    <title>ACME Ltd 2016 ixbrl document</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css"></link>
+  </head>
+
+  <body>
+    <div style="display:none">
+      <ix:header>
+        <ix:hidden>
+          <ix:tuple tupleID="documentInfo" name="uk-bus:XBRLDocumentAuthorGrouping" />
+          <ix:nonNumeric tupleRef="documentInfo" contextRef="duration-2016-10-31" name="uk-bus:NameAuthor" order="1">Circle Accounts (Ireland)</ix:nonNumeric>
+          <ix:nonNumeric tupleRef="documentInfo" contextRef="duration-2016-10-31" name="uk-bus:DescriptionOrTitleAuthor" order="2">www.circle-accounts.com</ix:nonNumeric>
+
+          <ix:nonNumeric contextRef="instant-2016-10-31" name="uk-bus:StartDateForPeriodCoveredByReport">2015-11-01</ix:nonNumeric>
+          <ix:nonNumeric contextRef="instant-2016-10-31" name="uk-bus:EndDateForPeriodCoveredByReport">2016-10-31</ix:nonNumeric>
+
+          <ix:nonNumeric name='uk-bus:EntityDormant' contextRef="duration-2016-10-31">false</ix:nonNumeric>
+
+          <ix:nonNumeric name='uk-bus:EntityTrading' contextRef="duration-2016-10-31">true</ix:nonNumeric>
+        </ix:hidden>
+        <ix:references>
+          <link:schemaRef xlink:type="simple" xlink:href="http://www.xbrl-ie.net/public/ci/2012-12-01/gaap/core/2012-12-01/ie-gaap-full-2012-12-01.xsd"
+          />
+        </ix:references>
+        <ix:resources>
+          <xbrli:context id="duration-2016-10-31">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://www.revenue.ie/">4518100B</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:startDate>2015-11-01</xbrli:startDate>
+              <xbrli:endDate>2016-10-31</xbrli:endDate>
+            </xbrli:period>
+          </xbrli:context>
+          <xbrli:context id="instant-2016-10-31">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://www.revenue.ie/">4518100B</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:instant>2016-10-31</xbrli:instant>
+            </xbrli:period>
+          </xbrli:context>
+          <xbrli:context id="duration-2015-10-31">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://www.revenue.ie/">4518100B</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:startDate>2014-11-01</xbrli:startDate>
+              <xbrli:endDate>2015-10-31</xbrli:endDate>
+            </xbrli:period>
+          </xbrli:context>
+
+          <xbrli:unit id="EUR">
+            <xbrli:measure>iso4217:EUR</xbrli:measure>
+          </xbrli:unit>
+          <xbrli:unit id="Shares">
+            <xbrli:measure>xbrli:shares</xbrli:measure>
+          </xbrli:unit>
+          <xbrli:unit id="Pure">
+            <xbrli:measure>xbrli:pure</xbrli:measure>
+          </xbrli:unit>
+          <xbrli:unit id="EURperShare">
+            <xbrli:divide>
+              <xbrli:unitNumerator>
+                <xbrli:measure>iso4217:EUR</xbrli:measure>
+              </xbrli:unitNumerator>
+              <xbrli:unitDenominator>
+                <xbrli:measure>xbrli:shares</xbrli:measure>
+              </xbrli:unitDenominator>
+            </xbrli:divide>
+          </xbrli:unit>
+
+        </ix:resources>
+      </ix:header>
+    </div>
+    <div class="container">
+      <div class="card">
+        <div class="card-block">
+          <table class="table table-bordered">
+            <tbody>
+              <tr>
+                <td>
+                  Director 1
+                  <ix:nonFraction contextRef="instant-2016-10-31-uk-bus_Director1" name="uk-direp:NumberSharesInEntityOrItsUndertakingsDirectors"
+                    unitRef="Shares" decimals="INF">
+                    6000
+                  </ix:nonFraction>
+                </td>
+                <td>
+
+                </td>
+                <td>
+
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <ix:nonNumeric contextRef="duration-2016-10-31" name="uk-gaap:DescriptionSignificantChangeInActivitiesDuringPeriod">
+                    No changes.
+                  </ix:nonNumeric>
+                </td>
+                <td>
+
+                </td>
+                <td>
+
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <ix:nonNumeric contextRef="duration-2016-10-31" name="uk-direp:StatementOnQualityCompletenessInformationProvidedToAuditors">
+                    The directors acknowledge their responsibilities under Sections 281 to 285 of the Companies Act 2014 tokeep adequate accounting
+                    records for the company. The accounting records of the company are kept atthe company's office at Church
+                    Road, Ballina.
+                  </ix:nonNumeric>
+                </td>
+                <td>
+
+                </td>
+                <td>
+
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <ix:nonNumeric contextRef="duration-2016-10-31" name="uk-direp:DirectorsAcknowledgeTheirResponsibilitiesUnderCompaniesAct">
+                    The Directors' are responsible for preparing the Directors' report and the financial statements inaccordance with applicable
+                    Irish law and regulations.Irish Company law requires the Directors to prepare financial statements for
+                    each financial year. 
+                  </ix:nonNumeric>
+                </td>
+                <td>
+
+                </td>
+                <td>
+
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <ix:nonNumeric contextRef="duration-2016-10-31-uk-bus_Director2" name="uk-direp:DirectorSigningReport"><ix:exclude>Director 1</ix:exclude></ix:nonNumeric>
+                </td>
+                <td>
+                  Director
+                </td>
+                <td>
+
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <ix:nonNumeric contextRef="instant-2016-10-31" name="uk-direp:DateSigningDirectorsReport" format="ixt:datelonguk">
+                    18 July 2017
+                  </ix:nonNumeric>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <ix:nonNumeric contextRef="duration-2016-10-31-uk-bus_EntityAccountantsOrAuditors" name="uk-aurep:StatementOnScopeAuditReport">
+                    As a firm regulated by Chartered Accountants Ireland our work will be carried out in accordance with theMiscellaneous Technical
+                    Statement No.41 Chartered Accountants' Reports on the Compilation ofFinancial Statements of Incorporated
+                    Entities and ISRS 4410 International Standard on Related Services- Compilation Engagements. In carrying
+                  </ix:nonNumeric>
+                </td>
+                <td>
+
+                </td>
+                <td>
+
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Rental Income
+                </td>
+                <td>
+
+                </td>
+                <td>
+
+                  <ix:nonFraction contextRef="duration-2016-10-31" format="ixt:numcommadot" name="uk-gaap:GrossProfitLoss" unitRef="EUR" decimals="0"
+                    scale="0">
+                    1,000,000
+                  </ix:nonFraction>
+
+                </td>
+                <td>
+
+                  <ix:nonFraction contextRef="duration-2015-10-31" format="ixt:numcommadot" name="uk-gaap:GrossProfitLoss" unitRef="EUR" decimals="0"
+                    scale="0">
+                    3,000
+                  </ix:nonFraction>
+
+                </td>
+                <td>
+
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Operating Costs
+                </td>
+                <td>
+
+                </td>
+                <td>
+                  (
+                  <ix:nonFraction contextRef="duration-2016-10-31" format="ixt:numcommadot" name="uk-gaap:AdministrativeExpenses" unitRef="EUR"
+                    decimals="0" scale="0">
+                    6214
+                  </ix:nonFraction>
+                  )
+                </td>
+                <td>
+                  (
+                  <ix:nonFraction contextRef="duration-2015-10-31" format="ixt:numcommadot" name="uk-gaap:AdministrativeExpenses" unitRef="EUR"
+                    decimals="0" scale="0">
+                    5484
+                  </ix:nonFraction>
+                  )
+                </td>
+                <td>
+
+                </td>
+              </tr>
+              <tr>
+                <td>
+
+                  <ix:nonFraction contextRef="duration-2016-10-31" format="ixt:numcommadot" name="uk-gaap:OperatingProfitLoss" unitRef="EUR"
+                    decimals="0" scale="0">
+                    2,000
+                  </ix:nonFraction>
+
+                </td>
+                <td>
+
+                  <ix:nonFraction sign='-' contextRef="duration-2015-10-31" format="ixt:numcommadot" name="uk-gaap:OperatingProfitLoss" unitRef="EUR"
+                    decimals="0" scale="0">
+                    2,000
+                  </ix:nonFraction>
+
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>  
+    </div>
+  </body>
+</html>        

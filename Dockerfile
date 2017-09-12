@@ -31,4 +31,6 @@ COPY . ./
 
 EXPOSE 4567
 
-CMD ["jruby", "app.rb"]
+ENTRYPOINT ["jruby"]
+
+CMD ["app.rb"]

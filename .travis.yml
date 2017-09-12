@@ -1,0 +1,7 @@
+sudo: required
+
+services:
+  - docker
+
+script:
+  - docker run --rm -it -v ${PWD}:/app seocahill/xbrl-validator tests/converter_test.rb

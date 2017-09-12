@@ -89,8 +89,8 @@ class BusinessRulesValidator
 
   def validate_xbrl_schemas(errors)
     begin
-      Converter.new(@doc).to_xbrl
-      xbrl_doc = Nokogiri::XML(File.open('xbrl.xml'))
+      xbrl_xml = Converter.new(@doc).to_xbrl
+      xbrl_doc = Nokogiri::XML(xbrl_xml)
       file = "./xsd/ie/ie-gaap-full-2012-12-01.xsd"
       xsd = Nokogiri::XML::Schema(File.open(file))
       xsd.validate(xbrl_doc).each do |error|

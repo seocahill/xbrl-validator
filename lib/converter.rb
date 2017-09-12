@@ -9,6 +9,7 @@ class Converter
   def to_xbrl
     # ixbrl attributes need to be stripped from facts
     excluded_attributes = ["name", "scale", "format", "order", "tupleRef", "tupleID", "sign"]
+    @tuple_lookup = {}
 
     # extract relevant sections
     schema_ref = @ixbrl_doc.search('link|schemaRef')
@@ -46,24 +47,39 @@ class Converter
     # Add tuples
     tuples.each do |tuple|
       tuple_node = @xbrl_doc.create_element(tuple.attributes["name"].value, tuple.content)
-      tuple.attributes.each { |k,v| tuple_node[k] = v }
       insert_node.add_next_sibling(tuple_node)
       insert_node = tuple_node
+      # for looking up tuple parents when adding facts
+      @tuple_lookup[tuple.attributes["tupleID"].value] = tuple_node
     end
 
     # Add facts
     facts.each do |fact|
+      # format per ixbrl tranform rules
       content = formatted_content(fact)
       fact_node = @xbrl_doc.create_element(fact.attributes["name"].value, content)
-      fact.attributes
-        .reject { |k,v| excluded_attributes.include?(k) }
-        .each { |k,v| fact_node[k] = v }
-      insert_node.add_next_sibling(fact_node)
-      insert_node = fact_node
+      # add applicable attributes
+      fact.attributes.reject { |k,v| excluded_attributes.include?(k) }.each { |k,v| fact_node[k] = v }
+      # If fact is a tuple item append to parent
+      if tuple = tuple_parent(fact)
+        tuple.add_child(fact_node)
+      else
+        insert_node.add_next_sibling(fact_node)
+        insert_node = fact_node
+      end
     end
 
-    # Save file to disk for validation
+    # Save file to disk to debug
     File.open('xbrl.xml', 'w') { |file| file.write(@xbrl_doc.to_xml) }
+
+    # return xml
+    @xbrl_doc.to_xml
+  end
+
+  def tuple_parent(fact)
+    return nil unless fact.attributes.has_key?("tupleRef")
+    id = fact.attributes["tupleRef"].value
+    @tuple_lookup[id]
   end
 
   def formatted_content(fact)
@@ -77,7 +93,7 @@ class Converter
       end
     end 
 
-    content.strip
+    content.strip 
 
     # format strings
     if format == "ixt:numcommadot"

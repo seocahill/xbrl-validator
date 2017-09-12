@@ -1,11 +1,14 @@
+require 'logger'
 require 'sinatra'
 require 'nokogiri'
 require 'json'
 require 'time'
+require_relative 'lib/converter'
 
 set :server, :puma
 set :bind, '0.0.0.0'
 
+# Need this for health check
 get '/' do
   200
 end
@@ -51,6 +54,7 @@ class BusinessRulesValidator
   end
 
   def validate_document
+    @messages[:validate_schema] = validate_schema
     @messages[:schema_ref] = schema_ref
     @messages[:mandatory_tags_present] = mandatory_tags_present
     @messages[:period_dates] = period_dates
@@ -60,6 +64,42 @@ class BusinessRulesValidator
     @messages[:context_identifiers] = context_identifiers
     @messages[:cro_number_required] = cro_number_required
     @messages
+  end
+
+  def validate_schema
+    errors = []
+    validate_ixbrl_schemas(errors)
+    validate_xbrl_schemas(errors)
+    message = errors.any? ? "invalid" : "valid"
+    {message: message, errors: errors}
+  end
+
+  def validate_ixbrl_schemas(errors)
+    begin
+      file = "./xsd/xhtml-inlinexbrl-1_0.xsd"
+      xsd = Nokogiri::XML::Schema(File.open(file))
+      xsd.validate(@doc).each do |error|
+        errors << error
+      end
+    rescue Nokogiri::XML::SyntaxError => e
+      errors << "caught exception: #{e}"
+      @log.error("caught exception: #{e}")
+    end
+  end
+
+  def validate_xbrl_schemas(errors)
+    begin
+      xbrl_xml = Converter.new(@doc).to_xbrl
+      xbrl_doc = Nokogiri::XML(xbrl_xml)
+      file = "./xsd/ie/ie-gaap-full-2012-12-01.xsd"
+      xsd = Nokogiri::XML::Schema(File.open(file))
+      xsd.validate(xbrl_doc).each do |error|
+        errors << error
+      end
+    rescue Nokogiri::XML::SyntaxError => e
+      errors << "caught exception: #{e}"
+      @log.error("caught exception: #{e}")
+    end
   end
 
   def schema_ref
@@ -186,7 +226,7 @@ class BusinessRulesValidator
   def fact_value(fact)
     if fact.name == "nonFraction"
       currency_value = fact.text.gsub(/\D/, '').to_i
-      fact.attributes["sign"]&.value == '-1' ? (currency_value * -1) : currency_value
+      fact.attributes["sign"]&.value == '-' ? (currency_value * -1) : currency_value
     else
       fact.text
     end

@@ -93,8 +93,6 @@ class Converter
       end
     end 
 
-    content.strip 
-
     # format strings
     if format == "ixt:numcommadot"
       num = content.gsub(/\(/, "-").gsub(/\,|\)/, "").to_i

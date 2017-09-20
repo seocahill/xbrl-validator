@@ -149,7 +149,7 @@ class BusinessRulesValidator
       if dictionary[name][context].nil?
         dictionary[name][context] = { value: value, line_number: fact.line }
       elsif dictionary[name][context][:value] != value
-        duplicate_fact = add_duplicate_fact(fact, value, dictionary[name][context])
+        duplicate_fact = add_duplicate_fact(fact, dictionary[name][context])
         duplicate_facts << duplicate_fact
       end
     end
@@ -206,11 +206,11 @@ class BusinessRulesValidator
 
   private
 
-  def add_duplicate_fact(fact, value, entry)
+  def add_duplicate_fact(fact, entry)
     { 
       name: fact.attributes["name"].value, 
       context: fact.attributes["contextRef"].value,
-      value: value,
+      value: fact.text,
       line_number: fact.line,
       conflicting_fact: entry
     }
